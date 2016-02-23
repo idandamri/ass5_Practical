@@ -1683,10 +1683,10 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 				Set<State[]> newState=null;
 				int curcolorJ = j;// mapping color
 				if((!accptedStates.contains(start[0])) && i==curcolorJ){
-					newState=addNewTrans(start, toReturn,curcolorJ,alpha,sTag);// recursive
+					newState=addNewTransitions(start, toReturn,curcolorJ,alpha,sTag);// recursive
 				}
 				else if(accptedStates.contains(start[0]) && curcolorJ==((i%range)+1)){
-					newState=addNewTrans(start, toReturn,curcolorJ,alpha,sTag);// recursive
+					newState=addNewTransitions(start, toReturn,curcolorJ,alpha,sTag);// recursive
 				}
 				if(newState!=null){// recursive didn't return null
 					Iterator<State[]> itrrec = newState.iterator();
@@ -1704,19 +1704,19 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 
 
 	
-	private Set<State[]> addNewTrans( State[] start, Automaton toReturn, int curcolorJ, Set<String> alpha, Set<State> sTag) {
-		Iterator<State> itrTo = sTag.iterator();
+	private Set<State[]> addNewTransitions( State[] start, Automaton toReturn, int curcolorJ, Set<String> alpha, Set<State> sTag) {
+		Iterator<State> iterate_to = sTag.iterator();
 		State state_from = new State(start[0].getLabel()+","+start[1].getLabel());
-		Set<State[]> newStates = new HashSet<State[]>();
-		while(itrTo.hasNext()){
-			State cur_to = itrTo.next();
-			State state_new = new State(cur_to.getLabel()+","+curcolorJ);
+		Set<State[]> new_states_set_toReturn = new HashSet<State[]>();
+		while(iterate_to.hasNext()){
+			State curr_to = iterate_to.next();
+			State state_new = new State(curr_to.getLabel()+","+curcolorJ);
 			toReturn.addTransition(state_from, alpha, state_new);
 			toReturn.addState(state_new);
-			State[] toAr = {cur_to,new State(curcolorJ+"")};
-			newStates.add(toAr);
+			State[] toAr = {curr_to,new State(curcolorJ+"")};
+			new_states_set_toReturn.add(toAr);
 		}
-		return newStates;
+		return new_states_set_toReturn;
 	}
 	
 
