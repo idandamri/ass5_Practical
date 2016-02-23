@@ -1722,92 +1722,112 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 
 	@Override
 	public Automaton LTL2BA(Ltl ltl) {
-		MultiColorAutomaton ans = new MultiColorAutomaton();
+		MultiColorAutomaton toReturn = new MultiColorAutomaton();
 		
-		Set<Ltl> closure = new HashSet<Ltl>();
+		Set<Ltl> ltls_closure = new HashSet<Ltl>();
 		Set<Ltl> AP = new HashSet<Ltl>();
+		calcClosure(ltls_closure,AP,ltl);
 		Set<Set<Ltl>> startBgroup = new HashSet<Set<Ltl>>(); 
-		calcClosure(closure,AP,ltl);
-		Object[] ar = AP.toArray();
+		Object[] ar = AP.toArray();// diffrent objects array - anoying problem!!!
 
 		generateBaseGroup(startBgroup,new HashSet<Ltl>(), ar,0);
+		findAllB(startBgroup,ltl);// really needed?
+		
+		/*** 
+		 * 
+		debug prints: 
+		
 		System.out.println("BASE groups:"+startBgroup.size()+startBgroup);
-		findAllB(startBgroup,ltl);/****nessecery? or test****/
 		System.out.println("Batomic:"+AP);
 		System.out.println("groups:"+startBgroup);
 		System.out.println(startBgroup.size());
-		System.out.println("closure:"+closure.size()+closure.toString());
+		System.out.println("closure:"+ltls_closure.size()+ltls_closure.toString());
+		
+		***/
+		
 		//Q0 and Q1
-		for(Set<Ltl> set :startBgroup ){
+		Iterator<Set<Ltl>> start_group_iter = startBgroup.iterator();
+		while(start_group_iter.hasNext()){
+			Set<Ltl> set = start_group_iter.next();
 			if(set.contains(ltl)){
-				ans.setInitial(new State(set.toString()));
+				toReturn.setInitial(new State(set.toString()));
 				System.out.println("initial state"+set);
 			}
 		}
+
 		//final && trans
-		System.out.println("final state:");
+//		System.out.println("final state:");
 		int i=1;
-		boolean onecolor=false;
-		for(Ltl cur: closure){
-			if (cur instanceof Until){
+		boolean color1=false;
+		Iterator<Ltl> ltls_clo_iter = ltls_closure.iterator();
+		while(ltls_clo_iter.hasNext()){
+			Ltl curr_ltl = ltls_clo_iter.next();
+			if (curr_ltl instanceof Until){
 				for(Set<Ltl> set :startBgroup ){
-					if(!set.contains(cur)){
-						ans.setAccepting(new State(set.toString()), i);
-						System.out.println(set);
-						onecolor=true;
+					if(set.contains(((Until)curr_ltl).getRight())){
+						color1=true;
+						toReturn.setAccepting(new State(set.toString()), i);
+//						System.out.println(set);
 					}
-					else if(set.contains(((Until)cur).getRight())){
-						ans.setAccepting(new State(set.toString()), i);
-						System.out.println(set);
-						onecolor=true;
-					}
+					else if(!set.contains(curr_ltl)){
+						color1=true;
+						toReturn.setAccepting(new State(set.toString()), i);
+//						System.out.println(set);
+					} 
 				}
-			i++;//color
+			i++;// for color mapping 
 			}
 		}
-		if(!onecolor){ // there is no until
-			for(Set<Ltl> set :startBgroup ){
-				ans.setAccepting(new State(set.toString()),0);
+		if(!color1){ // there is no until
+			Iterator<Set<Ltl>> ltl_set_iter = startBgroup.iterator();
+			while(ltl_set_iter.hasNext()){
+				Set<Ltl> curr_ltl_set = ltl_set_iter.next();
+				toReturn.setAccepting(new State(curr_ltl_set.toString()),0);
 			}
-			
 		}
+		
 		for(Set<Ltl> B: startBgroup){//choose B index i from set of B's
-			Set<Set<Ltl>> intersec= new HashSet<Set<Ltl>>();
-			for(Ltl l : closure){ 
+			Set<Set<Ltl>> oper_intersection= new HashSet<Set<Ltl>>();
+			Iterator<Ltl> ltls_clo_iter2 = ltls_closure.iterator();
+			while(ltls_clo_iter2.hasNext()){
+				Ltl l = ltls_clo_iter2.next();
 				Set<Set<Ltl>> targetGroups= new HashSet<Set<Ltl>>();
 				boolean flag=false;
-				if(l instanceof Next){
+				if(l instanceof Next){// O
+					flag=true;
 					nextRule(startBgroup, targetGroups, B, l);
+				}else if(l instanceof Until){// U
 					flag=true;
-				}else if(l instanceof Until){
 					untilRule(B,l,startBgroup,targetGroups);
-					flag=true;
 				}
-				if(flag){// if true there is new btagGroup
-					if(intersec.size()==0){
-						intersec.addAll(targetGroups);
+				if(flag){// if true there is new BtagGroup
+					if(oper_intersection.size()!=0){
+						oper_intersection.retainAll(targetGroups);	
 					}
 					else{
-						intersec.retainAll(targetGroups);	
+						oper_intersection.addAll(targetGroups);
 					}
 				}
 			}
 			//intersection contains all of the target groups
-			Set<Ltl> action= new HashSet<Ltl>(AP);
-			action.retainAll(B);
-			Set<String> ac = new HashSet<String>();
-			for(Ltl a: action){
-				ac.add(a.toString());
+			Set<String> actions = new HashSet<String>();
+			Set<Ltl> actions_from_ap = new HashSet<Ltl>(AP);
+			actions_from_ap.retainAll(B);
+			Iterator<Ltl> ltls_actions_iter = actions_from_ap.iterator();
+			while(ltls_actions_iter.hasNext()){
+				Ltl a = ltls_actions_iter.next();
+				actions.add(a.toString());
 			}
-			System.out.println("^^^^^^^^^^^^");
-			for(Set<Ltl> cur : intersec){
-			ans.addTransition(new State(B.toString()), ac,new State(cur.toString()));
-			System.out.println("from:"+B);
-			System.out.println("to:"+cur);
+			/*** printing for debug ***/
+//			System.out.println("^^^^^^^^^^^^");
+			for(Set<Ltl> cur : oper_intersection){
+				toReturn.addTransition(new State(B.toString()), actions,new State(cur.toString()));
+//			System.out.println("from:"+B);
+//			System.out.println("to:"+cur);
 			}
-			System.out.println("^^^^^^^^^^^^");
+//			System.out.println("^^^^^^^^^^^^");
 		}
-		return GNBA2NBA(ans);
+		return GNBA2NBA(toReturn);
 	}
 
 	
@@ -1840,14 +1860,12 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 						}
 					}
 				}
-
 			}
 			else{//take everything
 				for(Set<Ltl> Btag: startBgroup){
 						intersec.add(Btag);
 				}
 			}
-			
 		}
 		else{//not contains
 			if(!B.contains(l) && !B.contains(((Until)l).getRight())){
@@ -1872,7 +1890,6 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 		Set<Ltl> newNot = new HashSet<Ltl>();
 		newNot.addAll(curGroup);
-		
 		curGroup.add((Ltl)ar[i]);
 		newNot.add(new Not((Ltl)ar[i]));
 		generateBaseGroup(startBgroup,curGroup,ar,i+1);
@@ -1893,7 +1910,6 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			calcClosure(closure,ap,cast.getLeft());
 			calcClosure(closure,ap,cast.getRight());
 		}
-	
 		else if (ltl instanceof Next){
 			closure.add(ltl);
 			closure.add(new Not(ltl));
@@ -1914,14 +1930,11 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			Until cast = (Until)ltl;
 			calcClosure(closure,ap,cast.getLeft());
 			calcClosure(closure,ap,cast.getRight());
-
 		}
 		else {
 			System.out.println("not found match");
 			return;
-			
 		}
-			
 	}
 	
 	
@@ -1943,7 +1956,6 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 					cur.add(new Not(ltl));
 			}
 		}
-	
 		else if (ltl instanceof Next){
 			Next cast = (Next)ltl;
 			findAllB(startBgroup,cast.getInner());
@@ -1985,11 +1997,9 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 						temp.add(newGroup);
 						set.add(new Not(ltl));
 					}
-							
 				}
 			}
 			startBgroup.addAll(temp);
-			
 		}
 		else {
 			System.out.println("not found match");
