@@ -1637,13 +1637,17 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			toReturn.setInitial(new State(curr_state.getLabel()+",1"));
 		}
 		trans = mulAut.getTransitions();
-		Map<Integer,Integer> mapFi = new HashMap<Integer,Integer>();
+		Map<Integer,Integer> map_states_colors = new HashMap<Integer,Integer>();
 		Set<Integer> colors_range = mulAut.getColors();
 		int k = colors_range.size();
-		mapFi = map_colors(colors_range, mapFi);		//maping the colors the colors
+		map_states_colors = map_colors(colors_range, map_states_colors);//maping the colors the colors
+//		Iterator<State> iterator = initials.iterator();
+//	    while(iterator.hasNext()) {
+//	    	State[] state_element = iterator.next();
 		for (State[] state : initials)
-			generateNbaRec(toReturn,k, mulAut,trans,mapFi,state,new HashSet<State>());
-		Set<State> accepting = mulAut.getAcceptingStates(mapFi.get(1).intValue());
+			generateNbaRec(new HashSet<State>(),toReturn,k ,trans,map_states_colors,state,mulAut);
+//			generateNbaRec(toReturn,k, mulAut,trans,map_states_colors,state,new HashSet<State>());
+		Set<State> accepting = mulAut.getAcceptingStates(map_states_colors.get(1).intValue());
 		Iterator<State> iterator = accepting.iterator();
 	    while(iterator.hasNext()) {
 	    	State state_element = iterator.next();
@@ -1652,19 +1656,20 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		return toReturn;
 	}
 
-	private Map<Integer, Integer> map_colors(Set<Integer> colors_range, Map<Integer, Integer> mapFi) {
+	private Map<Integer, Integer> map_colors(Set<Integer> colors_range, Map<Integer, Integer> map_states_colors) {
 		int i=1;
 		Iterator<Integer> itrc = colors_range.iterator();
 		while(itrc.hasNext()){
-			mapFi.put(new Integer(i), itrc.next());
+			map_states_colors.put(new Integer(i), itrc.next());
 			i++;
 		}
-		return mapFi;		
+		return map_states_colors;		
 	}
 
-	public void generateNbaRec(Automaton ans,int k,MultiColorAutomaton mulAut,Map<State, Map<Set<String>, Set<State>>> trans,Map<Integer,Integer> mapFi,State[] start,Set<State> visited){
-		visited.add(arrayToState(start));
-		Map<Set<String>, Set<State>> transFromS = trans.get(start[0]);
+	public void generateNbaRec(Set<State> visited, Automaton toReturn ,int k,Map<State, Map<Set<String>, Set<State>>> transitions ,Map<Integer,Integer> map_states_colors,State[] start,MultiColorAutomaton mulAut){
+		State state_start = new State(start[0].getLabel()+","+start[1].getLabel());
+		visited.add(state_start);
+		Map<Set<String>, Set<State>> transFromS = transitions.get(start[0]);
 		if(transFromS==null)
 			return ;
 		Iterator<Entry<Set<String>, Set<State>>> itr = transFromS.entrySet().iterator();
@@ -1676,14 +1681,14 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			for(int j=1;j<=k;j++){
 				int curcolorJ = j;
 				int i = Integer.parseInt(start[1].getLabel());
-				Integer colori = mapFi.get(new Integer(i));
+				Integer colori = map_states_colors.get(new Integer(i));
 				Set<State> accptedStates = mulAut.getAcceptingStates(colori);
 				Set<State[]> newState=null;
 				if((!accptedStates.contains(start[0])) && i==curcolorJ){
-					newState=addNewTrans(ans,start,alpha,sTag,curcolorJ);
+					newState=addNewTrans(toReturn,start,alpha,sTag,curcolorJ);
 				}
 				else if(accptedStates.contains(start[0]) && curcolorJ==((i%k)+1)){
-					newState=addNewTrans(ans,start,alpha,sTag,curcolorJ);
+					newState=addNewTrans(toReturn,start,alpha,sTag,curcolorJ);
 				}
 				//call recursive
 
@@ -1691,9 +1696,9 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 					Iterator<State[]> itrrec = newState.iterator();
 					while(itrrec.hasNext()){
 						State[] curnewState = itrrec.next();
-						State to= arrayToState(curnewState);
-						if(!visited.contains(to)){
-							generateNbaRec(ans,k,mulAut, trans, mapFi, curnewState, visited);
+						State state_to = new State(curnewState[0].getLabel()+","+curnewState[1].getLabel());
+						if(!visited.contains(state_to)){
+							generateNbaRec(visited,toReturn,k, transitions, map_states_colors, curnewState, mulAut);
 						}
 					}
 				}
@@ -1701,20 +1706,20 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 	}
 
-	private State arrayToState(State[] s) {
-		return new State(s[0].getLabel()+","+s[1].getLabel());
-	}
+//	private State arrayToState(State[] s) {
+//		return ;
+//	}
 
 	
 	private Set<State[]> addNewTrans(Automaton ans, State[] start, Set<String> alpha, Set<State> sTag, int curcolorJ) {
 		Set<State[]> newStates = new HashSet<State[]>();
-		State from =arrayToState(start);
+		State state_from = new State(start[0].getLabel()+","+start[1].getLabel());
 		Iterator<State> itrTo = sTag.iterator();
 		while(itrTo.hasNext()){
 			State curTo = itrTo.next();
 			State newState = new State(curTo.getLabel()+","+curcolorJ);
 			ans.addState(newState);
-			ans.addTransition(from, alpha, newState);
+			ans.addTransition(state_from, alpha, newState);
 			State[] toAr = new State[2];
 			toAr[0]=curTo;
 			toAr[1]=new State(curcolorJ+"");
