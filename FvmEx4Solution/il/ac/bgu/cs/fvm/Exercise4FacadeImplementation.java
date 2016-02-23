@@ -1533,90 +1533,90 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 	/********* ass5 ********/
 	@Override
 	public TransitionSystem product(TransitionSystem ts, Automaton aut) {
-		TransitionSystem ans = createTransitionSystem();
-		//initial States
-		Set<State[]> initials= new HashSet<State[]>();
-		Iterator<State> tsitr = ts.getInitialStates().iterator();
-		Iterator<State> atintr = aut.getInitialStates().iterator();
-		Map<State, Map<Set<String>, Set<State>>> autTrans = aut.getTransitions();
-		Map<State, Set<String>> lblFunc = ts.getLabelingFunction();
+		Map<State, Map<Set<String>, Set<State>>> AUT_tranitions = aut.getTransitions();
+		Set<State[]> initial_states= new HashSet<State[]>();
+		Iterator<State> AUT_itr = aut.getInitialStates().iterator();
+		Iterator<State> TS_itr = ts.getInitialStates().iterator();
+		Map<State, Set<String>> lbl_Func = ts.getLabelingFunction();
+		TransitionSystem toReturn = createTransitionSystem();
 
-		while(tsitr.hasNext()){
-			State cur = tsitr.next();
-			while(atintr.hasNext()){
-				State cur2 = atintr.next();
-				Map<Set<String>, Set<State>> fromq0 = autTrans.get(cur2);
-				if(fromq0!=null)
+		while(TS_itr.hasNext()){
+			State curr_trans = TS_itr.next();
+			while(AUT_itr.hasNext()){
+				State curr_aut = AUT_itr.next();
+				Map<Set<String>, Set<State>> from_init_q = AUT_tranitions.get(curr_aut);
+				if(from_init_q!=null)
 				{
-					Set<String> s = lblFunc.get(cur);
+					Set<String> s = lbl_Func.get(curr_trans);
 					if(s==null)
 						s= new HashSet<String>();
-					Set<State> toq = fromq0.get(s);
-
-					if(toq!=null){
-						Iterator<State> itrq = toq.iterator();
-						while(itrq.hasNext()){
-							State q = itrq.next();
-							State[] add = new State[2];
-							add[0]=cur;
-							add[1]=q;
-							initials.add(add);
-							State newState = new State(cur.getLabel()+","+q.getLabel());
-							ans.addState(newState);
-							ans.addInitialState(newState);
-							ans.addAtomicProposition(q.getLabel());
-							ans.addLabel(newState, q.getLabel());
-						}
-					}
+					toReturn = handle_to_q(s,toReturn,from_init_q,curr_trans, initial_states);
 				}
 			}
 		}
-		Set<Transition> tstrans = ts.getTransitions();
-		//ap
-		for (State[] state : initials)
-			generateTransProduct(ans,tstrans,state,autTrans,lblFunc ,new HashSet<State>());
-		return ans;
+		// for each s in TS given, 
+		Set<Transition> ts_transisions = ts.getTransitions();
+		
+		 Iterator<State[]> iterator = initial_states.iterator();
+		    while(iterator.hasNext()) {
+		    	State[] trans_element = iterator.next();
+				generateTransProduct(toReturn,ts_transisions,trans_element,AUT_tranitions,lbl_Func ,new HashSet<State>());
+		    }
+		return toReturn;
 	}
-
-	private void generateTransProduct(TransitionSystem ans,Set<Transition> trans, State[] start,
+	
+	private TransitionSystem handle_to_q(Set<String> s, TransitionSystem toReturn, Map<Set<String>, Set<State>> from_init_q, State curr_trans,
+			Set<State[]> initial_states) {
+		Set<State> toq = from_init_q.get(s);
+		if(toq!=null){
+			Iterator<State> itrq = toq.iterator();
+			while(itrq.hasNext()){
+				State q = itrq.next();
+				State[] add = {curr_trans,q};
+				initial_states.add(add);
+				State newState = new State(curr_trans.getLabel()+","+q.getLabel());
+				toReturn.addAtomicProposition(q.getLabel());
+				toReturn.addState(newState);
+				toReturn.addLabel(newState, q.getLabel());
+				toReturn.addInitialState(newState);
+			}	
+		}
+		return toReturn;
+	}
+	
+	private void generateTransProduct(TransitionSystem toReturn,Set<Transition> trans, State[] start,
 			Map<State, Map<Set<String>, Set<State>>> autTrans, Map<State, Set<String>> lblFunc,Set<State> visited) {
-
-		Iterator<Transition> itr = trans.iterator();
+		Iterator<Transition> iterator = trans.iterator();
 		visited.add(new State(start[0].getLabel()+","+start[1].getLabel()));
-
-		while(itr.hasNext()){
-			Transition curtrans = itr.next();
-			if(curtrans.getFrom().equals(start[0])){
-				Set<String> lbl = lblFunc.get(curtrans.getTo());
-				if(lbl==null)
-					lbl=new HashSet<String>();
-
-				Map<Set<String>, Set<State>> atr = autTrans.get(start[1]);
-				if(atr==null)
-					atr=new HashMap<Set<String>,Set<State>>();
-				Set<State> p = atr.get(lbl);
-				if(p!=null){
-					Iterator<State> itrp = p.iterator();
-					while(itrp.hasNext()){
-						State curp = itrp.next();
-						State t = curtrans.getTo();
+		while(iterator.hasNext()){
+			Transition curr_trans = iterator.next();
+			if(curr_trans.getFrom().equals(start[0])){
+				Set<String> lable = lblFunc.get(curr_trans.getTo());
+				if(lable==null)
+					lable=new HashSet<String>();
+				Map<Set<String>, Set<State>> aut_trans = autTrans.get(start[1]);
+				if(aut_trans==null)
+					aut_trans=new HashMap<Set<String>,Set<State>>();
+				Set<State> p_state = aut_trans.get(lable);//q->p
+				if(p_state!=null){
+					Iterator<State> iterp = p_state.iterator();
+					while(iterp.hasNext()){
+						State curr_aut_p = iterp.next();
+						State next_state_t = curr_trans.getTo();
 						//add states , add ap,add trans call with new state// add action
-						State newState = new State(t.getLabel()+","+curp.getLabel());
-						ans.addState(newState);
-						ans.addAtomicProposition(curp.getLabel());
-						ans.addLabel(newState, curp.getLabel());
-						ans.addAction(curtrans.getAction());
+						State newState = new State(next_state_t.getLabel()+","+curr_aut_p.getLabel());
+						toReturn.addState(newState);
+						toReturn.addAtomicProposition(curr_aut_p.getLabel());
+						toReturn.addAction(curr_trans.getAction());
+						toReturn.addLabel(newState, curr_aut_p.getLabel());
 						//add trans
 						State from = new State(start[0].getLabel()+","+start[1].getLabel());
-						Transition newTrans = new Transition(from, curtrans.getAction(), newState);
-						ans.addTransition(newTrans);
+						Transition newTrans = new Transition(from, curr_trans.getAction(), newState);
+						toReturn.addTransition(newTrans);
 						//go with new state
-						State[] newstart = new State[2];
-						newstart[0]=t;
-						newstart[1]=curp;		
+						State[] new_start_state = {next_state_t, curr_aut_p};		
 						if(!visited.contains(newState))
-							generateTransProduct( ans, trans, newstart,
-									autTrans,  lblFunc,visited);
+							generateTransProduct(toReturn, trans, new_start_state,autTrans,  lblFunc,visited);
 					}
 				}
 			}
@@ -1625,43 +1625,41 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 
 	@Override
 	public Automaton GNBA2NBA(MultiColorAutomaton mulAut) {
-		Automaton ans = new Automaton();
-		//add states
-		Map<State, Map<Set<String>, Set<State>>> trans = mulAut.getTransitions();
-		//initial states
-		Iterator<State> initialStatesItr = mulAut.getInitialStates().iterator();
 		Set<State[]> initials= new HashSet<State[]>();
-		//init
+		Map<State, Map<Set<String>, Set<State>>> trans = mulAut.getTransitions();
+		Automaton toReturn = new Automaton();
+		Iterator<State> initialStatesItr = mulAut.getInitialStates().iterator();
+		State curr_state = null;
 		while(initialStatesItr.hasNext()){
-			State cur = initialStatesItr.next();
-			State[] add = new State[2];
-			add[0]=cur;
-			add[1] = new State("1");
+			curr_state = initialStatesItr.next();
+			State[] add = {curr_state, new State("1")};
 			initials.add(add);
-			State newstate = new State(cur.getLabel()+",1");
-			//			ans.addState(newstate);
-			ans.setInitial(newstate);
+			toReturn.setInitial(new State(curr_state.getLabel()+",1"));
 		}
-		trans=mulAut.getTransitions();
-		Set<Integer> colors = mulAut.getColors();
+		trans = mulAut.getTransitions();
 		Map<Integer,Integer> mapFi = new HashMap<Integer,Integer>();
-		int k=colors.size();
-		//map the colors
+		Set<Integer> colors_range = mulAut.getColors();
+		int k = colors_range.size();
+		mapFi = map_colors(colors_range, mapFi);		//maping the colors the colors
+		for (State[] state : initials)
+			generateNbaRec(toReturn,k, mulAut,trans,mapFi,state,new HashSet<State>());
+		Set<State> accepting = mulAut.getAcceptingStates(mapFi.get(1).intValue());
+		Iterator<State> iterator = accepting.iterator();
+	    while(iterator.hasNext()) {
+	    	State state_element = iterator.next();
+			toReturn.setAccepting(new State(state_element.getLabel()+","+1));
+	    }
+		return toReturn;
+	}
+
+	private Map<Integer, Integer> map_colors(Set<Integer> colors_range, Map<Integer, Integer> mapFi) {
 		int i=1;
-		Iterator<Integer> itrc = colors.iterator();
+		Iterator<Integer> itrc = colors_range.iterator();
 		while(itrc.hasNext()){
 			mapFi.put(new Integer(i), itrc.next());
 			i++;
 		}
-		
-		for (State[] state : initials)
-			generateNbaRec( ans,k, mulAut,trans,mapFi,state,new HashSet<State>());
-
-		//final
-		Set<State> accepting = mulAut.getAcceptingStates(mapFi.get(1).intValue());
-		for (State state : accepting)
-			ans.setAccepting(new State(state.getLabel()+","+1));
-		return ans;
+		return mapFi;		
 	}
 
 	public void generateNbaRec(Automaton ans,int k,MultiColorAutomaton mulAut,Map<State, Map<Set<String>, Set<State>>> trans,Map<Integer,Integer> mapFi,State[] start,Set<State> visited){
@@ -1707,6 +1705,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		return new State(s[0].getLabel()+","+s[1].getLabel());
 	}
 
+	
 	private Set<State[]> addNewTrans(Automaton ans, State[] start, Set<String> alpha, Set<State> sTag, int curcolorJ) {
 		Set<State[]> newStates = new HashSet<State[]>();
 		State from =arrayToState(start);
@@ -1723,6 +1722,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 		return newStates;
 	}
+	
 
 	@Override
 	public Automaton LTL2BA(Ltl ltl) {
@@ -1814,6 +1814,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		return GNBA2NBA(ans);
 	}
 
+	
 	private void nextRule(Set<Set<Ltl>> startBgroup, Set<Set<Ltl>> intersec, Set<Ltl> B, Ltl l) {
 			for(Set<Ltl> Btag: startBgroup){
 				if(B.contains(l)){
@@ -1831,6 +1832,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			}					
 	}
 
+	
 	private void untilRule(Set<Ltl> B, Ltl l,Set<Set<Ltl>> startBgroup ,Set<Set<Ltl>> intersec) {
 		if(B.contains(l)){
 			if(!B.contains(((Until)l).getRight())){
@@ -1866,6 +1868,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 	}
 
+	
 	private void generateBaseGroup(Set<Set<Ltl>> startBgroup,Set<Ltl> curGroup, Object[] ar, int i) {
 		if(i>=ar.length){
 			startBgroup.add(curGroup);
@@ -1880,6 +1883,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		generateBaseGroup(startBgroup,newNot,ar,i+1);
 	}
 
+	
 	private void calcClosure(Set<Ltl> closure,Set<Ltl> ap,Ltl ltl) {
 		 if (ltl instanceof AtomicProposition){
 			closure.add(ltl);
@@ -1923,6 +1927,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 			
 	}
+	
 	
 	private void findAllB(Set<Set<Ltl>>startBgroup,Ltl ltl) {
 		 if (ltl instanceof AtomicProposition){
