@@ -1645,8 +1645,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 //	    while(iterator.hasNext()) {
 //	    	State[] state_element = iterator.next();
 		for (State[] state : initials)
-			generateNbaRec(new HashSet<State>(),toReturn,k ,trans,map_states_colors,state,mulAut);
-//			generateNbaRec(toReturn,k, mulAut,trans,map_states_colors,state,new HashSet<State>());
+			generateNbaRecursive(new HashSet<State>(),toReturn,k ,trans,map_states_colors,state,mulAut);
 		Set<State> accepting = mulAut.getAcceptingStates(map_states_colors.get(1).intValue());
 		Iterator<State> iterator = accepting.iterator();
 	    while(iterator.hasNext()) {
@@ -1666,7 +1665,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		return map_states_colors;		
 	}
 
-	public void generateNbaRec(Set<State> visited, Automaton toReturn ,int k,Map<State, Map<Set<String>, Set<State>>> transitions ,Map<Integer,Integer> map_states_colors,State[] start,MultiColorAutomaton mulAut){
+	public void generateNbaRecursive(Set<State> visited, Automaton toReturn ,int k,Map<State, Map<Set<String>, Set<State>>> transitions ,Map<Integer,Integer> map_states_colors,State[] start,MultiColorAutomaton mulAut){
 		State state_start = new State(start[0].getLabel()+","+start[1].getLabel());
 		visited.add(state_start);
 		Map<Set<String>, Set<State>> transFromS = transitions.get(start[0]);
@@ -1677,7 +1676,6 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			Entry<Set<String>, Set<State>> curalpha = itr.next();
 			Set<String> alpha = curalpha.getKey();
 			Set<State> sTag = curalpha.getValue();
-			
 			for(int j=1;j<=k;j++){
 				int curcolorJ = j;
 				int i = Integer.parseInt(start[1].getLabel());
@@ -1685,20 +1683,18 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 				Set<State> accptedStates = mulAut.getAcceptingStates(colori);
 				Set<State[]> newState=null;
 				if((!accptedStates.contains(start[0])) && i==curcolorJ){
-					newState=addNewTrans(toReturn,start,alpha,sTag,curcolorJ);
+					newState=addNewTrans(start, toReturn,curcolorJ,alpha,sTag);
 				}
 				else if(accptedStates.contains(start[0]) && curcolorJ==((i%k)+1)){
-					newState=addNewTrans(toReturn,start,alpha,sTag,curcolorJ);
+					newState=addNewTrans(start, toReturn,curcolorJ,alpha,sTag);
 				}
-				//call recursive
-
-				if(newState!=null){
+				if(newState!=null){//call recursive
 					Iterator<State[]> itrrec = newState.iterator();
 					while(itrrec.hasNext()){
 						State[] curnewState = itrrec.next();
 						State state_to = new State(curnewState[0].getLabel()+","+curnewState[1].getLabel());
 						if(!visited.contains(state_to)){
-							generateNbaRec(visited,toReturn,k, transitions, map_states_colors, curnewState, mulAut);
+							generateNbaRecursive(visited,toReturn,k, transitions, map_states_colors, curnewState, mulAut);
 						}
 					}
 				}
@@ -1711,18 +1707,16 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 //	}
 
 	
-	private Set<State[]> addNewTrans(Automaton ans, State[] start, Set<String> alpha, Set<State> sTag, int curcolorJ) {
+	private Set<State[]> addNewTrans( State[] start, Automaton toReturn, int curcolorJ, Set<String> alpha, Set<State> sTag) {
 		Set<State[]> newStates = new HashSet<State[]>();
 		State state_from = new State(start[0].getLabel()+","+start[1].getLabel());
 		Iterator<State> itrTo = sTag.iterator();
 		while(itrTo.hasNext()){
 			State curTo = itrTo.next();
 			State newState = new State(curTo.getLabel()+","+curcolorJ);
-			ans.addState(newState);
-			ans.addTransition(state_from, alpha, newState);
-			State[] toAr = new State[2];
-			toAr[0]=curTo;
-			toAr[1]=new State(curcolorJ+"");
+			toReturn.addState(newState);
+			toReturn.addTransition(state_from, alpha, newState);
+			State[] toAr = {curTo,new State(curcolorJ+"")};
 			newStates.add(toAr);
 		}
 		return newStates;
