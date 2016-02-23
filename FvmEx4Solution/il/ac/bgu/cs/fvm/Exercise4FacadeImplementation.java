@@ -1530,7 +1530,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 	        return mainNanoPromela(root);
 	}
 	
-	/*** ass5 ***/
+	/********* ass5 ********/
 	@Override
 	public TransitionSystem product(TransitionSystem ts, Automaton aut) {
 		TransitionSystem ans = createTransitionSystem();

@@ -1,0 +1,13 @@
+/ActionNotFoundException.class
+/DeletionOfAttachedActionException.class
+/DeletionOfAttachedAtomicPropositionException.class
+/DeletionOfAttachedStateException.class
+/FVMException.class
+/InvalidInitialStateException.class
+/InvalidLablingPairException.class
+/InvalidTSDescriptionException.class
+/InvalidTransitionException.class
+/InvalidXmlException.class
+/NotAnAlternatingSequenceException.class
+/StateNotFoundException.class
+/TransitionSystemPart.class
