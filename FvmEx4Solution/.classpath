@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/FvmEx4"/>
+	<classpathentry kind="lib" path="/FvmEx4/libraries/antlr-4.5.1-complete.jar"/>
+	<classpathentry kind="lib" path="/FvmEx4/libraries/org.svvrl.goal.cmd.jar"/>
+	<classpathentry kind="lib" path="/FvmEx4/libraries/org.svvrl.goal.core.jar"/>
+	<classpathentry kind="lib" path="/FvmEx4/libraries/org.svvrl.goal.gui.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
