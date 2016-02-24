@@ -1726,11 +1726,11 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		
 		Set<Ltl> ltls_closure = new HashSet<Ltl>();
 		Set<Ltl> AP = new HashSet<Ltl>();
-		calcClosure(ltls_closure,AP,ltl);
+		calcClosure(ltl, ltls_closure,AP);
 		Set<Set<Ltl>> startBgroup = new HashSet<Set<Ltl>>(); 
 		Object[] ar = AP.toArray();// diffrent objects array - anoying problem!!!
 
-		generateBaseGroup(startBgroup,new HashSet<Ltl>(), ar,0);
+		generateBaseGroup(0, ar,startBgroup,new HashSet<Ltl>());
 		findAllB(startBgroup,ltl);// really needed?
 		
 		/*** 
@@ -1832,50 +1832,55 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 
 	
 	private void nextRule(Set<Set<Ltl>> startBgroup, Set<Set<Ltl>> intersec, Set<Ltl> B, Ltl l) {
-			for(Set<Ltl> Btag: startBgroup){
-				if(B.contains(l)){
-					if (Btag.contains(((Next)l).getInner())){
-					intersec.add(Btag);
-						}
-				}
-				else{
-					if (!B.contains(l)){
-						if (!Btag.contains(((Next)l).getInner())){
-							intersec.add(Btag);
-								}
+		Iterator<Set<Ltl>> ltl_iterator = startBgroup.iterator();
+		while (ltl_iterator.hasNext()){
+			Set<Ltl> B_tagging = ltl_iterator.next();
+			if(!B.contains(l)){
+				if (!B.contains(l)){
+					if (!B_tagging.contains(((Next)l).getInner())){// O
+						intersec.add(B_tagging);
 					}
 				}
-			}					
+			}
+			else{
+				if (B_tagging.contains(((Next)l).getInner())){// O
+				intersec.add(B_tagging);
+				}
+			}
+		}					
 	}
-
-	
+		
 	private void untilRule(Set<Ltl> B, Ltl l,Set<Set<Ltl>> startBgroup ,Set<Set<Ltl>> intersec) {
+		Iterator<Set<Ltl>> ltl_B_iterator = startBgroup.iterator();
 		if(B.contains(l)){
 			if(!B.contains(((Until)l).getRight())){
 				//check kilshun1 in b?
 				if(B.contains(((Until)l).getLeft())){
-					for(Set<Ltl> Btag: startBgroup){
-						if (Btag.contains(((Until)l))){
-							intersec.add(Btag);
+					while (ltl_B_iterator.hasNext()){
+						Set<Ltl> B_tagging = ltl_B_iterator.next();
+						if (B_tagging.contains(((Until)l))){
+							intersec.add(B_tagging);
 						}
 					}
 				}
 			}
 			else{//take everything
-				for(Set<Ltl> Btag: startBgroup){
-						intersec.add(Btag);
+				while (ltl_B_iterator.hasNext()){
+					Set<Ltl> B_tagging = ltl_B_iterator.next();
+						intersec.add(B_tagging);
 				}
 			}
 		}
-		else{//not contains
+		else{
 			if(!B.contains(l) && !B.contains(((Until)l).getRight())){
-				for(Set<Ltl> Btag: startBgroup){
+				while (ltl_B_iterator.hasNext()){
+					Set<Ltl> B_tagging = ltl_B_iterator.next();
 					if(B.contains(((Until)l).getLeft())){
-						if (!Btag.contains(((Until)l))){
-							intersec.add(Btag);
+						if (!B_tagging.contains(((Until)l))){
+							intersec.add(B_tagging);
 						}
 					}else{
-						intersec.add(Btag);
+						intersec.add(B_tagging);
 					}
 				}
 			}
@@ -1883,53 +1888,55 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 	}
 
 	
-	private void generateBaseGroup(Set<Set<Ltl>> startBgroup,Set<Ltl> curGroup, Object[] ar, int i) {
+	private void generateBaseGroup(int i, Object[] ar, Set<Set<Ltl>> startBgroup,Set<Ltl> curr_group) {
 		if(i>=ar.length){
-			startBgroup.add(curGroup);
+			startBgroup.add(curr_group);
 			return;
 		}
-		Set<Ltl> newNot = new HashSet<Ltl>();
-		newNot.addAll(curGroup);
-		curGroup.add((Ltl)ar[i]);
-		newNot.add(new Not((Ltl)ar[i]));
-		generateBaseGroup(startBgroup,curGroup,ar,i+1);
-		generateBaseGroup(startBgroup,newNot,ar,i+1);
+		else{
+			Set<Ltl> new_not_group = new HashSet<Ltl>();
+			new_not_group.addAll(curr_group);
+			curr_group.add((Ltl)ar[i]);
+			new_not_group.add(new Not((Ltl)ar[i]));
+			generateBaseGroup(i+1,ar, startBgroup,curr_group);
+			generateBaseGroup(i+1,ar, startBgroup,new_not_group);
+		}
 	}
 
 	
-	private void calcClosure(Set<Ltl> closure,Set<Ltl> ap,Ltl ltl) {
+	private void calcClosure(Ltl ltl, Set<Ltl> closure_group,Set<Ltl> ap_group) {
 		 if (ltl instanceof AtomicProposition){
-			closure.add(ltl);
-			closure.add(new Not(ltl));
-			ap.add(ltl);
-		}	
-		 else if (ltl instanceof And){
-			closure.add(ltl);
-			closure.add(new Not(ltl));
-			And cast = (And)ltl;
-			calcClosure(closure,ap,cast.getLeft());
-			calcClosure(closure,ap,cast.getRight());
+			closure_group.add(ltl);
+			closure_group.add(new Not(ltl));
+			ap_group.add(ltl);
 		}
 		else if (ltl instanceof Next){
-			closure.add(ltl);
-			closure.add(new Not(ltl));
+			closure_group.add(ltl);
+			closure_group.add(new Not(ltl));
 			Next cast = (Next)ltl;
-			calcClosure(closure,ap,cast.getInner());
-		}
-		else if (ltl instanceof Not){
-			closure.add(ltl);
-			Not cast = (Not)ltl;
-			calcClosure(closure,ap,cast.getInner());
-		}
-		else if (ltl instanceof T){
-			closure.add(ltl);
+			calcClosure(cast.getInner(), closure_group,ap_group);
 		}
 		else if (ltl instanceof Until){
-			closure.add(ltl);
-			closure.add(new Not(ltl));
+			closure_group.add(ltl);
+			closure_group.add(new Not(ltl));
 			Until cast = (Until)ltl;
-			calcClosure(closure,ap,cast.getLeft());
-			calcClosure(closure,ap,cast.getRight());
+			calcClosure(cast.getLeft(), closure_group,ap_group);
+			calcClosure(cast.getRight(), closure_group,ap_group);
+		}	
+		else if (ltl instanceof And){
+			 closure_group.add(ltl);
+			 closure_group.add(new Not(ltl));
+			And cast = (And)ltl;
+			calcClosure(cast.getLeft(), closure_group,ap_group);
+			calcClosure(cast.getRight(), closure_group,ap_group);
+		}
+		else if (ltl instanceof Not){
+			closure_group.add(ltl);
+			Not cast = (Not)ltl;
+			calcClosure(cast.getInner() ,closure_group,ap_group);
+		}
+		else if (ltl instanceof T){
+			closure_group.add(ltl);
 		}
 		else {
 			System.out.println("not found match");
@@ -1938,6 +1945,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 	}
 	
 	
+	/**************** need to finish!!! *******************/
 	private void findAllB(Set<Set<Ltl>>startBgroup,Ltl ltl) {
 		 if (ltl instanceof AtomicProposition){
 			 return;
