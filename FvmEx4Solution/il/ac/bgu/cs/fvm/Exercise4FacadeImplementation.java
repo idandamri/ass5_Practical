@@ -51,7 +51,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.tree.TerminalNode;
- 
+
 public class Exercise4FacadeImplementation implements Exercise4Facade {
 	@Override
 	public ProgramGraph createProgramGraph() {
@@ -181,7 +181,7 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 
 		return ans;
 	}
-	
+
 	private void removeUnreachLoc(ProgramGraph ans){
 		//check for reachable lcoations
 		//		System.out.println(ans.getLocations().size());
@@ -786,7 +786,7 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 		return true;
 
 	}
-	
+
 	private Set<PGTransition> searchTrans(ProgramGraph programGraph, Location from, Location to) {
 		Iterator<PGTransition> itr = programGraph.getTransitions().iterator();
 		HashSet<PGTransition> ans = new HashSet<PGTransition>();
@@ -1053,7 +1053,7 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 		StmtContext root = NanoPromelaFileReader.pareseNanoPromelaString(nanopromela);
 		return mainNanoPromela(root);
 	}
-	
+
 	private ProgramGraph mainNanoPromela(StmtContext root){
 
 		ProgramGraph ans = createProgramGraph();
@@ -1072,7 +1072,7 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 
 
 	}
-	
+
 	private void addTrans(ProgramGraph ans, HashMap<Location, Set<PGTransition>> trans) {
 		Iterator<Entry<Location, Set<PGTransition>>> itr = trans.entrySet().iterator();
 		Set<Location> locs = ans.getLocations();
@@ -1470,16 +1470,16 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		sc.put(newLocation(stmt.getText()), stmt);
 		return stmt;
 	}
-	
+
 	private TerminalNode COL() {
 		StmtContext temp = NanoPromelaFileReader.pareseNanoPromelaString("x:=1; y:=1");
 		return (TerminalNode) temp.getChild(1);
 	}
-	
+
 	private Location newLocation(String s) {
 		return new Location("["+s+"]");
 	}
-	
+
 	private String newCond(String h, String alpa) {
 		boolean bh=!h.equals("");
 		boolean ba=!alpa.equals("");
@@ -1522,14 +1522,14 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 
 	@Override
 	public ProgramGraph programGraphFromNanoPromela(InputStream inputStream) throws Exception {
-		  NanoPromelaLexer lexer = new NanoPromelaLexer(new ANTLRInputStream(inputStream));
-	        CommonTokenStream tokens = new CommonTokenStream(lexer);
-	        NanoPromelaParser parser = new NanoPromelaParser(tokens);
-	        ParserRuleContext tree = parser.stmt();
-	        StmtContext root = (StmtContext) tree.getRuleContext();
-	        return mainNanoPromela(root);
+		NanoPromelaLexer lexer = new NanoPromelaLexer(new ANTLRInputStream(inputStream));
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		NanoPromelaParser parser = new NanoPromelaParser(tokens);
+		ParserRuleContext tree = parser.stmt();
+		StmtContext root = (StmtContext) tree.getRuleContext();
+		return mainNanoPromela(root);
 	}
-	
+
 	/********* ass5 ********/
 	@Override
 	public TransitionSystem product(TransitionSystem ts, Automaton aut) {
@@ -1556,15 +1556,15 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 		// for each s in TS given, 
 		Set<Transition> ts_transisions = ts.getTransitions();
-		
-		 Iterator<State[]> iterator = initial_states.iterator();
-		    while(iterator.hasNext()) {
-		    	State[] trans_element = iterator.next();
-				generateTransProduct(toReturn,ts_transisions,trans_element,AUT_tranitions,lbl_Func ,new HashSet<State>());
-		    }
+
+		Iterator<State[]> iterator = initial_states.iterator();
+		while(iterator.hasNext()) {
+			State[] trans_element = iterator.next();
+			generateTransProduct(toReturn,ts_transisions,trans_element,AUT_tranitions,lbl_Func ,new HashSet<State>());
+		}
 		return toReturn;
 	}
-	
+
 	private TransitionSystem handle_to_q(Set<String> s, TransitionSystem toReturn, Map<Set<String>, Set<State>> from_init_q, State curr_trans,
 			Set<State[]> initial_states) {
 		Set<State> toq = from_init_q.get(s);
@@ -1583,7 +1583,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 		return toReturn;
 	}
-	
+
 	private void generateTransProduct(TransitionSystem toReturn,Set<Transition> trans, State[] start,
 			Map<State, Map<Set<String>, Set<State>>> autTrans, Map<State, Set<String>> lblFunc,Set<State> visited) {
 		Iterator<Transition> iterator = trans.iterator();
@@ -1641,17 +1641,17 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		Set<Integer> colors_range = mulAut.getColors();
 		int range = colors_range.size();
 		map_states_colors = map_colors(colors_range, map_states_colors);//maping the colors the colors
-//		Iterator<State> iterator = initials.iterator();
-//	    while(iterator.hasNext()) {
-//	    	State[] state_element = iterator.next();
+		//		Iterator<State> iterator = initials.iterator();
+		//	    while(iterator.hasNext()) {
+		//	    	State[] state_element = iterator.next();
 		for (State[] state : initials)
 			generateNbaRecursive(new HashSet<State>(),toReturn,range ,trans,map_states_colors,state,mulAut);
 		Set<State> accepting = mulAut.getAcceptingStates(map_states_colors.get(1).intValue());
 		Iterator<State> iterator = accepting.iterator();
-	    while(iterator.hasNext()) {
-	    	State state_element = iterator.next();
+		while(iterator.hasNext()) {
+			State state_element = iterator.next();
 			toReturn.setAccepting(new State(state_element.getLabel()+","+1));
-	    }
+		}
 		return toReturn;
 	}
 
@@ -1703,7 +1703,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 	}
 
 
-	
+
 	private Set<State[]> addNewTransitions( State[] start, Automaton toReturn, int curcolorJ, Set<String> alpha, Set<State> sTag) {
 		Iterator<State> iterate_to = sTag.iterator();
 		State state_from = new State(start[0].getLabel()+","+start[1].getLabel());
@@ -1718,33 +1718,33 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 		return new_states_set_toReturn;
 	}
-	
+
 
 	@Override
 	public Automaton LTL2BA(Ltl ltl) {
 		MultiColorAutomaton toReturn = new MultiColorAutomaton();
-		
+
 		Set<Ltl> ltls_closure = new HashSet<Ltl>();
 		Set<Ltl> AP = new HashSet<Ltl>();
-		calcClosure(ltl, ltls_closure,AP);
+		calcClosureHandler(ltl, ltls_closure,AP);
 		Set<Set<Ltl>> startBgroup = new HashSet<Set<Ltl>>(); 
 		Object[] ar = AP.toArray();// diffrent objects array - anoying problem!!!
 
-		generateBaseGroup(0, ar,startBgroup,new HashSet<Ltl>());
-		findAllB(startBgroup,ltl);// really needed?
-		
+		generateBaseGroupOfBsRec(0, ar,startBgroup,new HashSet<Ltl>());
+		findAllB(ltl,startBgroup);// really needed?
+
 		/*** 
 		 * 
 		debug prints: 
-		
+
 		System.out.println("BASE groups:"+startBgroup.size()+startBgroup);
 		System.out.println("Batomic:"+AP);
 		System.out.println("groups:"+startBgroup);
 		System.out.println(startBgroup.size());
 		System.out.println("closure:"+ltls_closure.size()+ltls_closure.toString());
-		
-		***/
-		
+
+		 ***/
+
 		//Q0 and Q1
 		Iterator<Set<Ltl>> start_group_iter = startBgroup.iterator();
 		while(start_group_iter.hasNext()){
@@ -1756,7 +1756,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 
 		//final && trans
-//		System.out.println("final state:");
+		//		System.out.println("final state:");
 		int i=1;
 		boolean color1=false;
 		Iterator<Ltl> ltls_clo_iter = ltls_closure.iterator();
@@ -1767,15 +1767,15 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 					if(set.contains(((Until)curr_ltl).getRight())){
 						color1=true;
 						toReturn.setAccepting(new State(set.toString()), i);
-//						System.out.println(set);
+						//						System.out.println(set);
 					}
 					else if(!set.contains(curr_ltl)){
 						color1=true;
 						toReturn.setAccepting(new State(set.toString()), i);
-//						System.out.println(set);
+						//						System.out.println(set);
 					} 
 				}
-			i++;// for color mapping 
+				i++;// for color mapping 
 			}
 		}
 		if(!color1){ // there is no until
@@ -1785,7 +1785,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 				toReturn.setAccepting(new State(curr_ltl_set.toString()),0);
 			}
 		}
-		
+
 		for(Set<Ltl> B: startBgroup){//choose B index i from set of B's
 			Set<Set<Ltl>> oper_intersection= new HashSet<Set<Ltl>>();
 			Iterator<Ltl> ltls_clo_iter2 = ltls_closure.iterator();
@@ -1795,10 +1795,10 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 				boolean flag=false;
 				if(l instanceof Next){// O
 					flag=true;
-					nextRule(startBgroup, targetGroups, B, l);
+					nextRuleBIntersect(startBgroup, targetGroups, B, l);
 				}else if(l instanceof Until){// U
 					flag=true;
-					untilRule(B,l,startBgroup,targetGroups);
+					untilRuleHandle(B,l,startBgroup,targetGroups);
 				}
 				if(flag){// if true there is new BtagGroup
 					if(oper_intersection.size()!=0){
@@ -1819,19 +1819,19 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 				actions.add(a.toString());
 			}
 			/*** printing for debug ***/
-//			System.out.println("^^^^^^^^^^^^");
+			//			System.out.println("^^^^^^^^^^^^");
 			for(Set<Ltl> cur : oper_intersection){
 				toReturn.addTransition(new State(B.toString()), actions,new State(cur.toString()));
-//			System.out.println("from:"+B);
-//			System.out.println("to:"+cur);
+				//			System.out.println("from:"+B);
+				//			System.out.println("to:"+cur);
 			}
-//			System.out.println("^^^^^^^^^^^^");
+			//			System.out.println("^^^^^^^^^^^^");
 		}
 		return GNBA2NBA(toReturn);
 	}
 
-	
-	private void nextRule(Set<Set<Ltl>> startBgroup, Set<Set<Ltl>> intersec, Set<Ltl> B, Ltl l) {
+
+	private void nextRuleBIntersect(Set<Set<Ltl>> startBgroup, Set<Set<Ltl>> intersec, Set<Ltl> B, Ltl l) {
 		Iterator<Set<Ltl>> ltl_iterator = startBgroup.iterator();
 		while (ltl_iterator.hasNext()){
 			Set<Ltl> B_tagging = ltl_iterator.next();
@@ -1844,13 +1844,13 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			}
 			else{
 				if (B_tagging.contains(((Next)l).getInner())){// O
-				intersec.add(B_tagging);
+					intersec.add(B_tagging);
 				}
 			}
 		}					
 	}
-		
-	private void untilRule(Set<Ltl> B, Ltl l,Set<Set<Ltl>> startBgroup ,Set<Set<Ltl>> intersec) {
+
+	private void untilRuleHandle(Set<Ltl> B, Ltl l,Set<Set<Ltl>> startBgroup ,Set<Set<Ltl>> intersec) {
 		Iterator<Set<Ltl>> ltl_B_iterator = startBgroup.iterator();
 		if(B.contains(l)){
 			if(!B.contains(((Until)l).getRight())){
@@ -1867,7 +1867,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			else{//take everything
 				while (ltl_B_iterator.hasNext()){
 					Set<Ltl> B_tagging = ltl_B_iterator.next();
-						intersec.add(B_tagging);
+					intersec.add(B_tagging);
 				}
 			}
 		}
@@ -1887,8 +1887,8 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 		}
 	}
 
-	
-	private void generateBaseGroup(int i, Object[] ar, Set<Set<Ltl>> startBgroup,Set<Ltl> curr_group) {
+
+	private void generateBaseGroupOfBsRec(int i, Object[] ar, Set<Set<Ltl>> startBgroup,Set<Ltl> curr_group) {
 		if(i>=ar.length){
 			startBgroup.add(curr_group);
 			return;
@@ -1898,14 +1898,14 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			new_not_group.addAll(curr_group);
 			curr_group.add((Ltl)ar[i]);
 			new_not_group.add(new Not((Ltl)ar[i]));
-			generateBaseGroup(i+1,ar, startBgroup,curr_group);
-			generateBaseGroup(i+1,ar, startBgroup,new_not_group);
+			generateBaseGroupOfBsRec(i+1,ar, startBgroup,curr_group);
+			generateBaseGroupOfBsRec(i+1,ar, startBgroup,new_not_group);
 		}
 	}
 
-	
-	private void calcClosure(Ltl ltl, Set<Ltl> closure_group,Set<Ltl> ap_group) {
-		 if (ltl instanceof AtomicProposition){
+
+	private void calcClosureHandler(Ltl ltl, Set<Ltl> closure_group,Set<Ltl> ap_group) {
+		if (ltl instanceof AtomicProposition){
 			closure_group.add(ltl);
 			closure_group.add(new Not(ltl));
 			ap_group.add(ltl);
@@ -1914,59 +1914,44 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			closure_group.add(ltl);
 			closure_group.add(new Not(ltl));
 			Next cast = (Next)ltl;
-			calcClosure(cast.getInner(), closure_group,ap_group);
+			calcClosureHandler(cast.getInner(), closure_group,ap_group);
 		}
 		else if (ltl instanceof Until){
 			closure_group.add(ltl);
 			closure_group.add(new Not(ltl));
 			Until cast = (Until)ltl;
-			calcClosure(cast.getLeft(), closure_group,ap_group);
-			calcClosure(cast.getRight(), closure_group,ap_group);
+			calcClosureHandler(cast.getLeft(), closure_group,ap_group);
+			calcClosureHandler(cast.getRight(), closure_group,ap_group);
 		}	
 		else if (ltl instanceof And){
-			 closure_group.add(ltl);
-			 closure_group.add(new Not(ltl));
+			closure_group.add(ltl);
+			closure_group.add(new Not(ltl));
 			And cast = (And)ltl;
-			calcClosure(cast.getLeft(), closure_group,ap_group);
-			calcClosure(cast.getRight(), closure_group,ap_group);
+			calcClosureHandler(cast.getLeft(), closure_group,ap_group);
+			calcClosureHandler(cast.getRight(), closure_group,ap_group);
 		}
 		else if (ltl instanceof Not){
 			closure_group.add(ltl);
 			Not cast = (Not)ltl;
-			calcClosure(cast.getInner() ,closure_group,ap_group);
+			calcClosureHandler(cast.getInner() ,closure_group,ap_group);
 		}
 		else if (ltl instanceof T){
 			closure_group.add(ltl);
 		}
 		else {
-			System.out.println("not found match");
+//			System.out.println("not found match");
 			return;
 		}
 	}
-	
-	
-	/**************** need to finish!!! *******************/
-	private void findAllB(Set<Set<Ltl>>startBgroup,Ltl ltl) {
-		 if (ltl instanceof AtomicProposition){
-			 return;
+
+
+	private void findAllB(Ltl ltl, Set<Set<Ltl>>startBgroup) {
+		if (ltl instanceof AtomicProposition){
+			return;// exit
 		}	
-		 else if (ltl instanceof And){
-			 //closure.add(ltl);
-			And cast = (And)ltl;
-			findAllB(startBgroup,cast.getLeft());
-			findAllB(startBgroup,cast.getRight());
-			Iterator<Set<Ltl>> itr = startBgroup.iterator();
-			while(itr.hasNext()){
-				Set<Ltl> cur = itr.next();
-				if(cur.contains(cast.getLeft()) && cur.contains(cast.getRight()))
-					cur.add(ltl);
-				else
-					cur.add(new Not(ltl));
-			}
-		}
 		else if (ltl instanceof Next){
 			Next cast = (Next)ltl;
-			findAllB(startBgroup,cast.getInner());
+			findAllB(cast.getInner(), startBgroup);
 			Not ltlnot=new Not(ltl);
 			Set<Set<Ltl>> temp = new HashSet<Set<Ltl>>();
 			for(Set<Ltl> set : startBgroup){
@@ -1976,21 +1961,33 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 				temp.add(newNot);
 			}
 			startBgroup.addAll(temp); 
-			
 		}
-		else if (ltl instanceof Not){
-			Not cast = (Not)ltl;
-			findAllB(startBgroup,cast.getInner());
+		else if (ltl instanceof And){
+			And cast = (And)ltl;
+			findAllB(cast.getLeft(),startBgroup);
+			findAllB(cast.getRight(),startBgroup);
+			Iterator<Set<Ltl>> itr = startBgroup.iterator();
+			while(itr.hasNext()){
+				Set<Ltl> cur = itr.next();
+				if(cur.contains(cast.getLeft()) && cur.contains(cast.getRight()))
+					cur.add(ltl);
+				else
+					cur.add(new Not(ltl));
+			}
 		}
 		else if (ltl instanceof T){
 			for(Set<Ltl> set : startBgroup){
 				set.add(ltl);
 			}
 		}
+		else if (ltl instanceof Not){
+			Not cast = (Not)ltl;
+			findAllB(cast.getInner(), startBgroup);
+		}
 		else if (ltl instanceof Until){
 			Until cast = (Until)ltl;
-			findAllB(startBgroup,cast.getLeft());
-			findAllB(startBgroup,cast.getRight());
+			findAllB(cast.getLeft(),startBgroup);
+			findAllB(cast.getRight(),startBgroup);
 			Set<Set<Ltl>> temp = new HashSet<Set<Ltl>>();
 			for(Set<Ltl> set : startBgroup){
 				if(set.contains(cast.getRight()))
@@ -1999,7 +1996,7 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 					if(!set.contains(cast.getLeft())){
 						set.add(new Not(ltl));
 					}
-					else{ // pizul
+					else{ // splitting
 						HashSet<Ltl> newGroup = new HashSet<Ltl>(set);
 						newGroup.add(ltl);
 						temp.add(newGroup);
@@ -2010,10 +2007,9 @@ where sub is a sub-statement of some op in root.dostmt().option() */
 			startBgroup.addAll(temp);
 		}
 		else {
-			System.out.println("not found match");
+//			System.out.println("not found match");
 			return;
 		}
-			
 	}
 
 }
