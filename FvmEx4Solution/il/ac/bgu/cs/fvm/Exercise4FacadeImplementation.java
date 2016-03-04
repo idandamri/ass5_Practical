@@ -60,11 +60,7 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 		pg.addLocation(initialLocation);
 		pg.addLocation(new Location("[]"));
 		pg.addInitialLocation(initialLocation);
-
 		createAllStateAndTrans(pg,context,initialLocation);
-
-
-
 	}
 
 	private void createAllStateAndTrans(ProgramGraph pg, StmtContext context,Location location) {
@@ -88,7 +84,6 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 	{
 		System.out.println(context.getText());
 		List<PGTransition> ans = new ArrayList<PGTransition>();
-
 		//if the root is atomic stmt
 		if (context.atomicstmt()!=null)
 		{
@@ -118,15 +113,11 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 		//there is something wrong
 		if (context.stmt().size()>0)
 		{
-
 			PGTransition trans = new PGTransition();
 			trans.setFrom(location);
 			trans.setCondition("");
 			ans.addAll(createTransitionForConcatenation(trans,context,acc));
-
-
 		}
-
 		return ans;
 	}
 
@@ -205,8 +196,6 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 
 			StmtContext innerElementInloop = createInnerConInLopp(option,loop);
 			ans.addAll(createTransitionForConcatenation(t,innerElementInloop,acc));
-
-
 		}
 		if (option.atomicstmt()!=null)
 		{
@@ -220,7 +209,6 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 			acc.put(loc,loop);
 			ans.add(newtrans);
 		}
-		//need to add 
 		return ans;
 	}
 
@@ -255,10 +243,8 @@ public class Exercise4FacadeImplementation implements Exercise4Facade {
 				else
 					t.setCondition("("+context.ifstmt().option(i).boolexpr().getText()+")");
 			}
-
 			//now we need to find the action and the to location, and add new condition if needed
 			ans.addAll(	tmpans);
-
 		}
 		return ans;
 	}
